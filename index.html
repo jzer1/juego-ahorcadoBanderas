@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dominación Mundial: Adivina la Bandera</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Tus estilos -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <!-- =================================================================
+    VIEW 1: MENÚ PRINCIPAL (SPLASH SCREEN)
+    ================================================================== -->
+    <div id="menu-view" class="w-full max-w-2xl text-center">
+        <div class="bg-gray-800 p-8 sm:p-12 rounded-xl shadow-2xl">
+            <h1 class="text-6xl font-extrabold text-white mb-6">Dominación Mundial</h1>
+            <p class="text-xl text-gray-300 mb-10">Adivina la bandera y conquista el mundo.</p>
+            
+            <div class="bg-gray-900 p-6 rounded-lg text-left mb-10">
+                <h2 class="text-2xl font-bold text-yellow-400 mb-4">Reglas del Juego</h2>
+                <ul class="list-disc list-inside space-y-2 text-gray-200">
+                    <li>Elige un continente del mapa para invadir.</li>
+                    <li>Adivina el nombre del país viendo su bandera.</li>
+                    <li>Tienes 3 tropas (vidas) por cada bandera.</li>
+                    <li>Si fallas una letra, pierdes una tropa.</li>
+                    <li>¡Domina todos los continentes para ganar el juego!</li>
+                    <li>Intenta conseguir la mejor racha de aciertos.</li>
+                </ul>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <button id="start-game-button" class="btn btn-primary">
+                    Iniciar Dominación
+                </button>
+                <button id="ranking-button" class="btn btn-secondary">
+                    Ver Ranking
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =================================================================
+    VIEW 2: SELECCIÓN DE CONTINENTE (MAPA)
+    ================================================================== -->
+    <div id="continent-select-view" class="w-full max-w-4xl hidden">
+        <div class="bg-gray-800 p-6 sm:p-8 rounded-xl shadow-2xl">
+            <header class="flex justify-between items-center mb-6 border-b border-gray-700 pb-4">
+                <h1 class="text-3xl font-extrabold text-white">Mapa de Conquista</h1>
+                <button id="back-to-menu-from-map" class="btn-icon">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h5a3 3 0 013 3v1"></path></svg>
+                    <span>Menú</span>
+                </button>
+            </header>
+            <p class="text-center text-lg text-gray-300 mb-8">Elige un continente para tu próxima campaña.</p>
+            
+            <div id="continent-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Continentes se generan por JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- =================================================================
+    VIEW 3: VISTA DE JUEGO (EL JUEGO PRINCIPAL)
+    ================================================================== -->
+    <div id="game-view" class="w-full max-w-4xl bg-gray-800 p-6 sm:p-8 rounded-xl shadow-2xl hidden">
+        
+        <!-- HEADER / STATUS -->
+        <header class="flex flex-col sm:flex-row justify-between items-center mb-6 border-b border-gray-700 pb-4">
+            <h1 class="text-3xl font-extrabold text-white mb-2 sm:mb-0">Dominación Mundial</h1>
+            <div class="flex items-center space-x-4 text-sm">
+                <!-- Botón de Salir -->
+                <button id="back-to-map-button" class="btn-icon text-sm">
+                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H3"></path></svg>
+                    <span>Mapa</span>
+                </button>
+                <!-- Racha -->
+                <div class="text-gray-300 font-medium">
+                    Racha: <span id="streak-display" class="text-yellow-400 font-bold">0</span>
+                </div>
+                <!-- Vidas (Troop Counter) -->
+                <div id="troops-display" class="flex items-center space-x-1 text-white text-lg font-semibold">
+                    <!-- Icons will be injected here -->
+                </div>
+                <!-- Continente Actual -->
+                <div class="text-gray-300 font-medium">
+                    Continente: <span id="continent-name" class="text-yellow-400 font-bold">...</span>
+                </div>
+                <!-- Países Dominados -->
+                <div class="text-gray-300 font-medium">
+                    Dominados: <span id="dominated-count" class="text-green-400 font-bold">0/0</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- GAME AREA -->
+        <main class="text-center">
+            
+            <!-- Flag Display -->
+            <div class="mb-8">
+                <img id="flag-image" class="flag-display mx-auto rounded-lg" 
+                     src="https://placehold.co/600x200/374151/FFFFFF?text=Cargando+Bandera..." 
+                     alt="Bandera del país a adivinar" 
+                     onerror="this.onerror=null; this.src='https://placehold.co/600x200/374151/FFFFFF?text=Bandera+no+disponible'">
+            </div>
+            
+            <!-- Word Blanks -->
+            <div id="word-display" class="mb-10 min-h-[60px] flex justify-center flex-wrap" style="letter-spacing: 5px;">
+                <span class="text-white text-xl">Inicia el juego...</span>
+            </div>
+
+            <!-- Messages -->
+            <div id="message-area" class="h-8 text-center text-lg font-semibold mb-6"></div>
+
+            <!-- Keyboard -->
+            <div id="keyboard" class="grid grid-cols-10 gap-2 p-4 bg-gray-700 rounded-lg">
+                <!-- Keyboard buttons generated by JS -->
+            </div>
+        </main>
+    </div>
+
+    <!-- =================================================================
+    VIEW 4: RANKING / RACHA
+    ================================================================== -->
+    <div id="ranking-view" class="w-full max-w-2xl text-center hidden">
+        <div class="bg-gray-800 p-8 sm:p-12 rounded-xl shadow-2xl">
+            <h1 class="text-5xl font-extrabold text-white mb-8">Ranking de Racha</h1>
+            
+            <div class="bg-gray-900 p-10 rounded-lg mb-10">
+                <h2 class="text-2xl font-bold text-yellow-400 mb-4">Mejor Racha de Aciertos</h2>
+                <p class="text-7xl font-bold text-white" id="best-streak-display">0</p>
+                <p class="text-gray-400 mt-2">¡Sigue jugando para mejorar tu marca!</p>
+            </div>
+
+            <button id="back-to-menu-from-ranking" class="btn btn-primary">
+                Volver al Menú
+            </button>
+        </div>
+    </div>
+
+    <!-- =================================================================
+    MODAL - Game Over/Win/Next Continent
+    ================================================================== -->
+    <div id="game-modal" class="modal fixed inset-0 z-50 bg-black bg-opacity-80 flex items-center justify-center invisible opacity-0">
+        <div class="bg-gray-900 p-8 rounded-xl shadow-2xl max-w-md w-full text-center border-t-4 border-yellow-500">
+            <h2 id="modal-title" class="text-4xl font-extrabold text-white mb-4"></h2>
+            <p id="modal-body" class="text-gray-300 text-lg mb-6"></p>
+            <button id="modal-button" class="btn btn-primary">
+                Continuar
+            </button>
+        </div>
+    </div>
+
+    <!-- Tu lógica JS -->
+    <script type= module src="script.js"></script>
+</body>
+</html>
